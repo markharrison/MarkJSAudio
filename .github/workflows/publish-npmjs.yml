@@ -1,0 +1,50 @@
+name: Manual Publish to NPM JS org
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: format GITTAG
+        run: |
+          VERSION_NUM="1.$(date "+%Y%m%d").${{github.run_number }}"
+          echo "GITTAG=v$VERSION_NUM" >> $GITHUB_ENV
+          echo "VERSION=$VERSION_NUM" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_MarkJS }}
+
+      - name: Update package.json version
+        run: |
+          jq ".version = \"${VERSION}\"" package.json > tmp.json && mv tmp.json package.json
+
+      - name: Commit version bump and create tag (only if changed)
+        env:
+          GH_PAT: ${{ secrets.GH_MarkJS }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add package.json
+            git commit -m "Bump version to $VERSION"
+            git tag $GITTAG
+            git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
+            git push origin HEAD:main
+            git push origin $GITTAG
+          else
+            echo "No changes to commit."
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Publish to NPM
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_MARKJS }}" > .npmrc
+          npm publish --access public

@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarkJSAudio Test Page</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        padding: 30px;
+      }
+
+      .section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+      }
+
+      .section h3 {
+        color: #4f46e5;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+        font-weight: 600;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+      }
+
+      .file-input-group {
+        margin-bottom: 20px;
+      }
+
+      .file-input-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #374151;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+      }
+
+      .file-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .file-input:hover {
+        border-color: #4f46e5;
+        background: #f3f4f6;
+      }
+
+      .button {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 5px;
+        font-size: 14px;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4);
+      }
+
+      .button:active {
+        transform: translateY(0);
+      }
+
+      .button.secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+      }
+
+      .button.danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+
+      .button.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      }
+
+      .button:disabled {
+        background: #d1d5db;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .volume-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .volume-group {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .volume-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #374151;
+      }
+
+      .volume-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 5px;
+        background: #d1d5db;
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #4f46e5;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .volume-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #4f46e5;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .transition-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .transition-control label {
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .transition-input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .log-section {
+        grid-column: 1 / -1;
+        max-height: 300px;
+      }
+
+      .log-container {
+        background: #1f2937;
+        border-radius: 8px;
+        padding: 20px;
+        max-height: 250px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+        padding: 5px 10px;
+        border-radius: 4px;
+      }
+
+      .log-entry.info {
+        color: #60a5fa;
+        background: rgba(96, 165, 250, 0.1);
+      }
+
+      .log-entry.success {
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.1);
+      }
+
+      .log-entry.error {
+        color: #f87171;
+        background: rgba(248, 113, 113, 0.1);
+      }
+
+      .log-entry.warning {
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.1);
+      }
+
+      .control-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .status-bar {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+      }
+
+      .status-item {
+        display: inline-block;
+        margin-right: 20px;
+        font-size: 14px;
+      }
+
+      .status-label {
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .status-value {
+        color: #4f46e5;
+        font-weight: 500;
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          grid-template-columns: 1fr;
+          gap: 20px;
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 2em;
+        }
+
+        .volume-controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎵 MarkJSAudio Test Page</h1>
+        <p>
+          Comprehensive testing interface for the MarkJSAudio JavaScript audio
+          library
+        </p>
+      </div>
+
+      <div class="content">
+        <!-- Initialization Section -->
+        <div class="section">
+          <h3>🚀 Initialization</h3>
+          <button id="initBtn" class="button">Initialize MarkJSAudio</button>
+          <button id="cleanupBtn" class="button danger" disabled>
+            Cleanup
+          </button>
+
+          <div class="status-bar">
+            <div class="status-item">
+              <span class="status-label">Status:</span>
+              <span id="initStatus" class="status-value">Not Initialized</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Context:</span>
+              <span id="contextStatus" class="status-value">None</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Loading Section -->
+        <div class="section">
+          <h3>📁 File Loading</h3>
+
+          <div class="file-input-group">
+            <label for="music1">Music Track 1:</label>
+            <input
+              type="file"
+              id="music1"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="loadMusic1" class="button" disabled>Load</button>
+              <button id="unloadMusic1" class="button secondary" disabled>
+                Unload
+              </button>
+            </div>
+          </div>
+
+          <div class="file-input-group">
+            <label for="music2">Music Track 2:</label>
+            <input
+              type="file"
+              id="music2"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="loadMusic2" class="button" disabled>Load</button>
+              <button id="unloadMusic2" class="button secondary" disabled>
+                Unload
+              </button>
+            </div>
+          </div>
+
+          <div class="file-input-group">
+            <label for="sfx1">SFX 1:</label>
+            <input
+              type="file"
+              id="sfx1"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="loadSfx1" class="button" disabled>Load</button>
+              <button id="unloadSfx1" class="button secondary" disabled>
+                Unload
+              </button>
+            </div>
+          </div>
+
+          <div class="file-input-group">
+            <label for="sfx2">SFX 2:</label>
+            <input
+              type="file"
+              id="sfx2"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="loadSfx2" class="button" disabled>Load</button>
+              <button id="unloadSfx2" class="button secondary" disabled>
+                Unload
+              </button>
+            </div>
+          </div>
+
+          <div class="file-input-group">
+            <label for="sfx3">SFX 3:</label>
+            <input
+              type="file"
+              id="sfx3"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="loadSfx3" class="button" disabled>Load</button>
+              <button id="unloadSfx3" class="button secondary" disabled>
+                Unload
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ArrayBuffer & Preloading Section -->
+        <div class="section">
+          <h3>🔄 ArrayBuffer & Preloading</h3>
+          <p style="margin-bottom: 15px; color: #6b7280; font-size: 14px">
+            Test ArrayBuffer loading and preloading functionality (fetch before
+            AudioContext, decode after)
+          </p>
+
+          <div class="file-input-group">
+            <label for="preloadFile">Test File for Preloading:</label>
+            <input
+              type="file"
+              id="preloadFile"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="preloadBtn" class="button" disabled>Preload</button>
+              <button id="processPreloadBtn" class="button success" disabled>
+                Process Preloaded
+              </button>
+              <button
+                id="processAllPreloadBtn"
+                class="button secondary"
+                disabled
+              >
+                Process All
+              </button>
+            </div>
+          </div>
+
+          <div class="file-input-group">
+            <label for="arrayBufferFile"
+              >Test File for Direct ArrayBuffer:</label
+            >
+            <input
+              type="file"
+              id="arrayBufferFile"
+              class="file-input"
+              accept=".mp3,.wav"
+              disabled
+            />
+            <div class="control-grid">
+              <button id="loadArrayBufferBtn" class="button" disabled>
+                Load from ArrayBuffer
+              </button>
+              <button
+                id="playArrayBufferTestBtn"
+                class="button success"
+                disabled
+              >
+                Play ArrayBuffer Test
+              </button>
+            </div>
+          </div>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 15px;
+              border-radius: 8px;
+              margin-top: 15px;
+            "
+          >
+            <h4 style="margin-bottom: 10px; color: #374151">Status:</h4>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                font-size: 14px;
+              "
+            >
+              <div>
+                Preloaded Items:
+                <span
+                  id="preloadedCount"
+                  style="font-weight: bold; color: #7c3aed"
+                  >0</span
+                >
+              </div>
+              <div>
+                ArrayBuffer Test:
+                <span
+                  id="arrayBufferStatus"
+                  style="font-weight: bold; color: #7c3aed"
+                  >Not Loaded</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Music Controls Section -->
+        <div class="section">
+          <h3>🎼 Music Controls</h3>
+
+          <div class="control-grid">
+            <button id="playMusic1" class="button success" disabled>
+              Play Music 1
+            </button>
+            <button id="playMusic2" class="button success" disabled>
+              Play Music 2
+            </button>
+            <button id="pauseMusic" class="button secondary" disabled>
+              Pause
+            </button>
+            <button id="resumeMusic" class="button" disabled>Resume</button>
+            <button id="stopMusic" class="button danger" disabled>
+              Stop Music
+            </button>
+          </div>
+
+          <div class="transition-control">
+            <label for="transitionTime">Transition Time (s):</label>
+            <input
+              type="number"
+              id="transitionTime"
+              class="transition-input"
+              min="1"
+              max="10"
+              value="3"
+              disabled
+            />
+            <button id="transitionMusic" class="button" disabled>
+              Smooth Transition
+            </button>
+          </div>
+        </div>
+
+        <!-- SFX Controls Section -->
+        <div class="section">
+          <h3>🔊 SFX Controls</h3>
+
+          <div class="control-grid">
+            <button id="playSfx1" class="button success" disabled>
+              Play SFX 1
+            </button>
+            <button id="playSfx2" class="button success" disabled>
+              Play SFX 2
+            </button>
+            <button id="playSfx3" class="button success" disabled>
+              Play SFX 3
+            </button>
+            <button id="playAllSfx" class="button" disabled>
+              Play All SFX
+            </button>
+            <button id="testLoop" class="button secondary" disabled>
+              Test Loop
+            </button>
+            <button id="stopAll" class="button danger" disabled>
+              Stop All
+            </button>
+          </div>
+        </div>
+
+        <!-- Volume Controls Section -->
+        <div class="section">
+          <h3>🔈 Volume Controls</h3>
+
+          <div class="volume-controls">
+            <div class="volume-group">
+              <label for="masterVolume"
+                >Master Volume: <span id="masterVolumeValue">100</span>%</label
+              >
+              <input
+                type="range"
+                id="masterVolume"
+                class="volume-slider"
+                min="0"
+                max="100"
+                value="100"
+                disabled
+              />
+            </div>
+
+            <div class="volume-group">
+              <label for="musicVolume"
+                >Music Volume: <span id="musicVolumeValue">100</span>%</label
+              >
+              <input
+                type="range"
+                id="musicVolume"
+                class="volume-slider"
+                min="0"
+                max="100"
+                value="100"
+                disabled
+              />
+            </div>
+
+            <div class="volume-group">
+              <label for="sfxVolume"
+                >SFX Volume: <span id="sfxVolumeValue">100</span>%</label
+              >
+              <input
+                type="range"
+                id="sfxVolume"
+                class="volume-slider"
+                min="0"
+                max="100"
+                value="100"
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Log Section -->
+        <div class="section log-section">
+          <h3>📋 Action Log</h3>
+          <button id="clearLog" class="button secondary">Clear Log</button>
+          <div id="logContainer" class="log-container">
+            <div class="log-entry info">
+              MarkJSAudio Test Page loaded. Click "Initialize MarkJSAudio" to
+              begin.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      /**
+       * MarkJSAudio Test JavaScript
+       * Handles all UI interactions and testing functionality
+       */
+      import { MarkJSAudio } from "./markjsaudio.js";
+
+      class MarkJSAudioTester {
+        constructor() {
+          this.audioMark = new MarkJSAudio();
+          this.currentMusicTrack = null;
+          this.loadedFiles = new Set();
+
+          this.initializeUI();
+          this.bindEvents();
+          this.enablePreloadingFunctionality(); // Enable preloading from the start
+          this.log("MarkJSAudio Tester initialized", "info");
+        }
+
+        initializeUI() {
+          // Get all UI elements
+          this.elements = {
+            // Buttons
+            initBtn: document.getElementById("initBtn"),
+            cleanupBtn: document.getElementById("cleanupBtn"),
+
+            // File inputs
+            music1: document.getElementById("music1"),
+            music2: document.getElementById("music2"),
+            sfx1: document.getElementById("sfx1"),
+            sfx2: document.getElementById("sfx2"),
+            sfx3: document.getElementById("sfx3"),
+
+            // Load/Unload buttons
+            loadMusic1: document.getElementById("loadMusic1"),
+            loadMusic2: document.getElementById("loadMusic2"),
+            loadSfx1: document.getElementById("loadSfx1"),
+            loadSfx2: document.getElementById("loadSfx2"),
+            loadSfx3: document.getElementById("loadSfx3"),
+            unloadMusic1: document.getElementById("unloadMusic1"),
+            unloadMusic2: document.getElementById("unloadMusic2"),
+            unloadSfx1: document.getElementById("unloadSfx1"),
+            unloadSfx2: document.getElementById("unloadSfx2"),
+            unloadSfx3: document.getElementById("unloadSfx3"),
+
+            // Music controls
+            playMusic1: document.getElementById("playMusic1"),
+            playMusic2: document.getElementById("playMusic2"),
+            pauseMusic: document.getElementById("pauseMusic"),
+            resumeMusic: document.getElementById("resumeMusic"),
+            stopMusic: document.getElementById("stopMusic"),
+            transitionTime: document.getElementById("transitionTime"),
+            transitionMusic: document.getElementById("transitionMusic"),
+
+            // SFX controls
+            playSfx1: document.getElementById("playSfx1"),
+            playSfx2: document.getElementById("playSfx2"),
+            playSfx3: document.getElementById("playSfx3"),
+            playAllSfx: document.getElementById("playAllSfx"),
+            testLoop: document.getElementById("testLoop"),
+            stopAll: document.getElementById("stopAll"),
+
+            // Volume controls
+            masterVolume: document.getElementById("masterVolume"),
+            musicVolume: document.getElementById("musicVolume"),
+            sfxVolume: document.getElementById("sfxVolume"),
+            masterVolumeValue: document.getElementById("masterVolumeValue"),
+            musicVolumeValue: document.getElementById("musicVolumeValue"),
+            sfxVolumeValue: document.getElementById("sfxVolumeValue"),
+
+            // Status and log
+            initStatus: document.getElementById("initStatus"),
+            contextStatus: document.getElementById("contextStatus"),
+            logContainer: document.getElementById("logContainer"),
+            clearLog: document.getElementById("clearLog"),
+
+            // ArrayBuffer & Preloading controls
+            preloadFile: document.getElementById("preloadFile"),
+            preloadBtn: document.getElementById("preloadBtn"),
+            processPreloadBtn: document.getElementById("processPreloadBtn"),
+            processAllPreloadBtn: document.getElementById(
+              "processAllPreloadBtn"
+            ),
+            arrayBufferFile: document.getElementById("arrayBufferFile"),
+            loadArrayBufferBtn: document.getElementById("loadArrayBufferBtn"),
+            playArrayBufferTestBtn: document.getElementById(
+              "playArrayBufferTestBtn"
+            ),
+            preloadedCount: document.getElementById("preloadedCount"),
+            arrayBufferStatus: document.getElementById("arrayBufferStatus"),
+          };
+        }
+
+        bindEvents() {
+          // Initialization
+          this.elements.initBtn.addEventListener("click", () =>
+            this.initializeMarkJSAudio()
+          );
+          this.elements.cleanupBtn.addEventListener("click", () =>
+            this.cleanup()
+          );
+
+          // File input change events
+          this.elements.music1.addEventListener("change", () =>
+            this.updateLoadButtonState("music1")
+          );
+          this.elements.music2.addEventListener("change", () =>
+            this.updateLoadButtonState("music2")
+          );
+          this.elements.sfx1.addEventListener("change", () =>
+            this.updateLoadButtonState("sfx1")
+          );
+          this.elements.sfx2.addEventListener("change", () =>
+            this.updateLoadButtonState("sfx2")
+          );
+          this.elements.sfx3.addEventListener("change", () =>
+            this.updateLoadButtonState("sfx3")
+          );
+
+          // File loading
+          this.elements.loadMusic1.addEventListener("click", () =>
+            this.loadFile("music1")
+          );
+          this.elements.loadMusic2.addEventListener("click", () =>
+            this.loadFile("music2")
+          );
+          this.elements.loadSfx1.addEventListener("click", () =>
+            this.loadFile("sfx1")
+          );
+          this.elements.loadSfx2.addEventListener("click", () =>
+            this.loadFile("sfx2")
+          );
+          this.elements.loadSfx3.addEventListener("click", () =>
+            this.loadFile("sfx3")
+          );
+
+          // File unloading
+          this.elements.unloadMusic1.addEventListener("click", () =>
+            this.unloadFile("music1")
+          );
+          this.elements.unloadMusic2.addEventListener("click", () =>
+            this.unloadFile("music2")
+          );
+          this.elements.unloadSfx1.addEventListener("click", () =>
+            this.unloadFile("sfx1")
+          );
+          this.elements.unloadSfx2.addEventListener("click", () =>
+            this.unloadFile("sfx2")
+          );
+          this.elements.unloadSfx3.addEventListener("click", () =>
+            this.unloadFile("sfx3")
+          );
+
+          // Music controls
+          this.elements.playMusic1.addEventListener("click", () =>
+            this.playMusic("music1")
+          );
+          this.elements.playMusic2.addEventListener("click", () =>
+            this.playMusic("music2")
+          );
+          this.elements.pauseMusic.addEventListener("click", () =>
+            this.pauseMusic()
+          );
+          this.elements.resumeMusic.addEventListener("click", () =>
+            this.resumeMusic()
+          );
+          this.elements.stopMusic.addEventListener("click", () =>
+            this.stopMusic()
+          );
+          this.elements.transitionMusic.addEventListener("click", () =>
+            this.transitionMusic()
+          );
+
+          // SFX controls
+          this.elements.playSfx1.addEventListener("click", () =>
+            this.playSFX("sfx1")
+          );
+          this.elements.playSfx2.addEventListener("click", () =>
+            this.playSFX("sfx2")
+          );
+          this.elements.playSfx3.addEventListener("click", () =>
+            this.playSFX("sfx3")
+          );
+          this.elements.playAllSfx.addEventListener("click", () =>
+            this.playAllSFX()
+          );
+          this.elements.testLoop.addEventListener("click", () =>
+            this.testLoop()
+          );
+          this.elements.stopAll.addEventListener("click", () => this.stopAll());
+
+          // Volume controls
+          this.elements.masterVolume.addEventListener("input", (e) =>
+            this.setVolume("master", e.target.value)
+          );
+          this.elements.musicVolume.addEventListener("input", (e) =>
+            this.setVolume("music", e.target.value)
+          );
+          this.elements.sfxVolume.addEventListener("input", (e) =>
+            this.setVolume("sfx", e.target.value)
+          );
+
+          // Log controls
+          this.elements.clearLog.addEventListener("click", () =>
+            this.clearLog()
+          );
+
+          // ArrayBuffer & Preloading events
+          this.elements.preloadFile.addEventListener("change", () =>
+            this.updatePreloadButtonState()
+          );
+          this.elements.preloadBtn.addEventListener("click", () =>
+            this.preloadFile()
+          );
+          this.elements.processPreloadBtn.addEventListener("click", () =>
+            this.processPreloadedFile()
+          );
+          this.elements.processAllPreloadBtn.addEventListener("click", () =>
+            this.processAllPreloaded()
+          );
+          this.elements.arrayBufferFile.addEventListener("change", () =>
+            this.updateArrayBufferButtonState()
+          );
+          this.elements.loadArrayBufferBtn.addEventListener("click", () =>
+            this.loadFromArrayBuffer()
+          );
+          this.elements.playArrayBufferTestBtn.addEventListener("click", () =>
+            this.playArrayBufferTest()
+          );
+
+          // Update status periodically
+          setInterval(() => this.updateStatus(), 1000);
+        }
+
+        async initializeMarkJSAudio() {
+          this.log("Initializing MarkJSAudio...", "info");
+          this.elements.initBtn.disabled = true;
+
+          try {
+            const success = await this.audioMark.initialize();
+            if (success) {
+              this.log("MarkJSAudio initialized successfully!", "success");
+              this.enableUI();
+            } else {
+              this.log("MarkJSAudio initialization failed", "error");
+              this.elements.initBtn.disabled = false;
+            }
+          } catch (error) {
+            this.log(`Initialization error: ${error.message}`, "error");
+            this.elements.initBtn.disabled = false;
+          }
+
+          this.updateStatus();
+        }
+
+        enablePreloadingFunctionality() {
+          // Enable preloading functionality that should work BEFORE MarkJSAudio initialization
+
+          // Enable preloading file input
+          if (this.elements.preloadFile) {
+            this.elements.preloadFile.disabled = false;
+          }
+
+          // Enable ArrayBuffer file input
+          if (this.elements.arrayBufferFile) {
+            this.elements.arrayBufferFile.disabled = false;
+          }
+
+          // Update button states (this will enable preload button when file is selected)
+          this.updatePreloadButtonState();
+          this.updateArrayBufferButtonState();
+        }
+
+        enableUI() {
+          // Enable file inputs and volume controls
+          Object.keys(this.elements).forEach((key) => {
+            if (
+              key.includes("Volume") ||
+              key.includes("transition") ||
+              key === "cleanupBtn"
+            ) {
+              const element = this.elements[key];
+              if (element && element.disabled !== undefined) {
+                element.disabled = false;
+              }
+            }
+          });
+
+          // Enable file inputs
+          ["music1", "music2", "sfx1", "sfx2", "sfx3"].forEach((name) => {
+            this.elements[name].disabled = false;
+            // Update load button state based on file selection
+            this.updateLoadButtonState(name);
+          });
+
+          // Enable ArrayBuffer file inputs (these don't use updateLoadButtonState)
+          ["preloadFile", "arrayBufferFile"].forEach((name) => {
+            this.elements[name].disabled = false;
+          });
+
+          // Enable ArrayBuffer specific controls
+          this.updatePreloadButtonState();
+          this.updateArrayBufferButtonState();
+
+          // Enable preload processing buttons
+          ["processAllPreloadBtn"].forEach((buttonName) => {
+            if (this.elements[buttonName]) {
+              this.elements[buttonName].disabled = false;
+            }
+          });
+
+          // Enable music and SFX controls (except load buttons which are handled by updateLoadButtonState)
+          [
+            "playMusic1",
+            "playMusic2",
+            "pauseMusic",
+            "resumeMusic",
+            "stopMusic",
+            "playSfx1",
+            "playSfx2",
+            "playSfx3",
+            "playAllSfx",
+            "testLoop",
+            "stopAll",
+            "transitionMusic",
+          ].forEach((buttonName) => {
+            if (this.elements[buttonName]) {
+              this.elements[buttonName].disabled = false;
+            }
+          });
+        }
+
+        updateLoadButtonState(name) {
+          const fileInput = this.elements[name];
+          const loadButton =
+            this.elements[
+              `load${name.charAt(0).toUpperCase() + name.slice(1)}`
+            ];
+          const unloadButton =
+            this.elements[
+              `unload${name.charAt(0).toUpperCase() + name.slice(1)}`
+            ];
+
+          if (!fileInput || !loadButton || !unloadButton) return;
+
+          const hasFile = fileInput.files && fileInput.files.length > 0;
+          const isInitialized = this.audioMark.getState().isInitialized;
+          const isLoaded = this.loadedFiles.has(name);
+
+          // Load button: enabled only if MarkJSAudio is initialized, file is selected, and not already loaded
+          loadButton.disabled = !isInitialized || !hasFile || isLoaded;
+
+          // Unload button: enabled only if file is loaded
+          unloadButton.disabled = !isLoaded;
+        }
+
+        disableUI() {
+          // Disable all controls except init button and clear log
+          Object.keys(this.elements).forEach((key) => {
+            if (key !== "initBtn" && key !== "clearLog") {
+              const element = this.elements[key];
+              if (element && element.disabled !== undefined) {
+                element.disabled = true;
+              }
+            }
+          });
+          this.elements.initBtn.disabled = false;
+        }
+
+        async loadFile(name) {
+          const fileInput = this.elements[name];
+          const file = fileInput.files[0];
+
+          if (!file) {
+            this.log(`No file selected for ${name}`, "warning");
+            return;
+          }
+
+          this.log(`Loading ${name}: ${file.name}...`, "info");
+
+          try {
+            const success = await this.audioMark.loadAudio(name, file);
+            if (success) {
+              this.loadedFiles.add(name);
+              this.log(`Successfully loaded ${name}: ${file.name}`, "success");
+              this.updateFileStatus(name, true);
+              this.updateLoadButtonState(name);
+            } else {
+              this.log(`Failed to load ${name}`, "error");
+            }
+          } catch (error) {
+            this.log(`Error loading ${name}: ${error.message}`, "error");
+          }
+        }
+
+        unloadFile(name) {
+          const success = this.audioMark.unloadAudio(name);
+          if (success) {
+            this.loadedFiles.delete(name);
+            this.log(`Unloaded ${name}`, "info");
+            this.updateFileStatus(name, false);
+            this.updateLoadButtonState(name);
+          } else {
+            this.log(`Failed to unload ${name} (not loaded)`, "warning");
+          }
+        }
+
+        updateFileStatus(name, loaded) {
+          const loadButton =
+            this.elements[
+              `load${name.charAt(0).toUpperCase() + name.slice(1)}`
+            ];
+          const unloadButton =
+            this.elements[
+              `unload${name.charAt(0).toUpperCase() + name.slice(1)}`
+            ];
+
+          if (loadButton && unloadButton) {
+            loadButton.style.background = loaded
+              ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+              : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+            loadButton.textContent = loaded ? "Loaded" : "Load";
+          }
+        }
+
+        playMusic(name) {
+          if (!this.loadedFiles.has(name)) {
+            this.log(`Cannot play ${name} - not loaded`, "warning");
+            return;
+          }
+
+          this.log(`Playing music: ${name}`, "info");
+          this.audioMark.playMusic(name, { loop: true });
+          this.currentMusicTrack = name;
+        }
+
+        pauseMusic() {
+          const success = this.audioMark.pauseMusic();
+          if (success) {
+            this.log("Music paused", "info");
+          } else {
+            this.log("No music to pause", "warning");
+          }
+        }
+
+        resumeMusic() {
+          const success = this.audioMark.resumeMusic();
+          if (success) {
+            this.log("Music resumed", "info");
+          } else {
+            this.log("No music to resume", "warning");
+          }
+        }
+
+        stopMusic() {
+          this.audioMark.stopMusic();
+          this.log("Music stopped", "info");
+          this.currentMusicTrack = null;
+        }
+
+        async transitionMusic() {
+          const transitionTime = parseFloat(this.elements.transitionTime.value);
+          const targetTrack =
+            this.currentMusicTrack === "music1" ? "music2" : "music1";
+
+          if (!this.loadedFiles.has(targetTrack)) {
+            this.log(
+              `Cannot transition to ${targetTrack} - not loaded`,
+              "warning"
+            );
+            return;
+          }
+
+          this.log(
+            `Transitioning to ${targetTrack} over ${transitionTime}s`,
+            "info"
+          );
+          const success = await this.audioMark.transitionMusic(
+            targetTrack,
+            transitionTime,
+            { loop: true }
+          );
+
+          if (success) {
+            this.currentMusicTrack = targetTrack;
+            this.log(`Transition to ${targetTrack} started`, "success");
+          } else {
+            this.log("Transition failed", "error");
+          }
+        }
+
+        playSFX(name) {
+          if (!this.loadedFiles.has(name)) {
+            this.log(`Cannot play ${name} - not loaded`, "warning");
+            return;
+          }
+
+          this.log(`Playing SFX: ${name}`, "info");
+          this.audioMark.playSFX(name);
+        }
+
+        playAllSFX() {
+          let played = 0;
+          ["sfx1", "sfx2", "sfx3"].forEach((name) => {
+            if (this.loadedFiles.has(name)) {
+              this.audioMark.playSFX(name);
+              played++;
+            }
+          });
+
+          if (played > 0) {
+            this.log(`Playing ${played} SFX simultaneously`, "info");
+          } else {
+            this.log("No SFX loaded to play", "warning");
+          }
+        }
+
+        testLoop() {
+          // Play first available SFX with loop
+          const availableSfx = ["sfx1", "sfx2", "sfx3"].find((name) =>
+            this.loadedFiles.has(name)
+          );
+
+          if (availableSfx) {
+            this.log(`Testing loop with ${availableSfx}`, "info");
+            this.audioMark.playSFX(availableSfx, { loop: true });
+          } else {
+            this.log("No SFX loaded for loop test", "warning");
+          }
+        }
+
+        stopAll() {
+          this.audioMark.stopAll();
+          this.log("All audio stopped", "info");
+          this.currentMusicTrack = null;
+        }
+
+        setVolume(type, value) {
+          this.audioMark.setVolume(type, value);
+          this.elements[`${type}VolumeValue`].textContent = value;
+          this.log(
+            `${
+              type.charAt(0).toUpperCase() + type.slice(1)
+            } volume set to ${value}%`,
+            "info"
+          );
+        }
+
+        cleanup() {
+          this.log("Cleaning up MarkJSAudio...", "info");
+          this.audioMark.cleanup();
+          this.loadedFiles.clear();
+          this.currentMusicTrack = null;
+          this.disableUI();
+          this.updateStatus();
+          this.log("Cleanup complete", "success");
+
+          // Reset file status indicators and update load button states
+          ["music1", "music2", "sfx1", "sfx2", "sfx3"].forEach((name) => {
+            this.updateFileStatus(name, false);
+            this.updateLoadButtonState(name);
+          });
+
+          // Reset ArrayBuffer UI elements
+          this.elements.preloadFile.value = "";
+          this.elements.arrayBufferFile.value = "";
+          this.updatePreloadButtonState();
+          this.updateArrayBufferButtonState();
+        }
+
+        updateStatus() {
+          const state = this.audioMark.getState();
+
+          this.elements.initStatus.textContent = state.isInitialized
+            ? "Initialized"
+            : "Not Initialized";
+          this.elements.contextStatus.textContent = state.audioContextState;
+
+          // Update ArrayBuffer status
+          this.updatePreloadedCount();
+          this.updateArrayBufferButtonState();
+
+          // Update button states based on current state
+          if (state.isInitialized) {
+            this.elements.initBtn.style.background =
+              "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+            this.elements.initBtn.textContent = "Initialized";
+          } else {
+            this.elements.initBtn.style.background =
+              "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+            this.elements.initBtn.textContent = "Initialize MarkJSAudio";
+          }
+        }
+
+        log(message, type = "info") {
+          const timestamp = new Date().toLocaleTimeString();
+          const logEntry = document.createElement("div");
+          logEntry.className = `log-entry ${type}`;
+          logEntry.textContent = `[${timestamp}] ${message}`;
+
+          this.elements.logContainer.appendChild(logEntry);
+          this.elements.logContainer.scrollTop =
+            this.elements.logContainer.scrollHeight;
+
+          // Limit log entries to prevent memory issues
+          const entries = this.elements.logContainer.children;
+          if (entries.length > 100) {
+            this.elements.logContainer.removeChild(entries[0]);
+          }
+
+          // Also log to console for debugging
+          console.log(`[MarkJSAudio] ${message}`);
+        }
+
+        clearLog() {
+          this.elements.logContainer.innerHTML = "";
+          this.log("Log cleared", "info");
+        }
+
+        // ArrayBuffer & Preloading methods
+
+        updatePreloadButtonState() {
+          const file = this.elements.preloadFile.files[0];
+          // Enable preload button when file is selected (works before MarkJSAudio initialization)
+          this.elements.preloadBtn.disabled = !file;
+
+          // Check if we have preloaded this file (only works after MarkJSAudio is created)
+          const filename = file ? file.name.replace(/\.[^/.]+$/, "") : null;
+          let hasPreloaded = false;
+          try {
+            hasPreloaded =
+              filename &&
+              this.audioMark.getState().preloadedAudio.includes(filename);
+          } catch (e) {
+            // MarkJSAudio might not be initialized yet, that's OK for preloading
+            hasPreloaded = false;
+          }
+          this.elements.processPreloadBtn.disabled = !hasPreloaded;
+        }
+
+        updateArrayBufferButtonState() {
+          const file = this.elements.arrayBufferFile.files[0];
+          // Enable load button when file is selected (but only if MarkJSAudio is initialized)
+          const isInitialized = this.audioMark.getState().isInitialized;
+          this.elements.loadArrayBufferBtn.disabled = !file || !isInitialized;
+
+          // Check if ArrayBuffer test audio is loaded
+          let hasArrayBufferTest = false;
+          try {
+            hasArrayBufferTest = this.audioMark
+              .getState()
+              .loadedAudio.includes("arrayBufferTest");
+          } catch (e) {
+            // MarkJSAudio might not be initialized yet
+            hasArrayBufferTest = false;
+          }
+          this.elements.playArrayBufferTestBtn.disabled = !hasArrayBufferTest;
+          this.elements.arrayBufferStatus.textContent = hasArrayBufferTest
+            ? "Loaded"
+            : "Not Loaded";
+          this.elements.arrayBufferStatus.style.color = hasArrayBufferTest
+            ? "#10b981"
+            : "#7c3aed";
+        }
+
+        async preloadFile() {
+          const file = this.elements.preloadFile.files[0];
+          if (!file) {
+            this.log("No file selected for preloading", "warning");
+            return;
+          }
+
+          const filename = file.name.replace(/\.[^/.]+$/, ""); // Remove extension for name
+          this.log(`Preloading ${filename}: ${file.name}...`, "info");
+
+          try {
+            const success = await this.audioMark.preloadAudio(filename, file);
+            if (success) {
+              this.log(
+                `Successfully preloaded ${filename} (raw data stored)`,
+                "success"
+              );
+              this.updatePreloadButtonState();
+              this.updatePreloadedCount();
+            } else {
+              this.log(`Failed to preload ${filename}`, "error");
+            }
+          } catch (error) {
+            this.log(`Error preloading ${filename}: ${error.message}`, "error");
+          }
+        }
+
+        async processPreloadedFile() {
+          const file = this.elements.preloadFile.files[0];
+          if (!file) {
+            this.log("No file selected", "warning");
+            return;
+          }
+
+          const filename = file.name.replace(/\.[^/.]+$/, "");
+          this.log(`Processing preloaded audio: ${filename}...`, "info");
+
+          try {
+            const success = await this.audioMark.processPreloadedAudio(
+              filename
+            );
+            if (success) {
+              this.log(
+                `Successfully processed preloaded audio: ${filename}`,
+                "success"
+              );
+              this.updatePreloadButtonState();
+              this.updatePreloadedCount();
+            } else {
+              this.log(
+                `Failed to process preloaded audio: ${filename}`,
+                "error"
+              );
+            }
+          } catch (error) {
+            this.log(
+              `Error processing preloaded audio: ${error.message}`,
+              "error"
+            );
+          }
+        }
+
+        async processAllPreloaded() {
+          this.log("Processing all preloaded audio...", "info");
+
+          try {
+            const results = await this.audioMark.processAllPreloadedAudio();
+            let successCount = 0;
+
+            results.forEach((result) => {
+              if (result.success) {
+                successCount++;
+                this.log(`✓ Processed: ${result.name}`, "success");
+              } else {
+                this.log(`✗ Failed: ${result.name}`, "error");
+              }
+            });
+
+            this.log(
+              `Processed ${successCount}/${results.length} preloaded audio files`,
+              "info"
+            );
+            this.updatePreloadButtonState();
+            this.updatePreloadedCount();
+          } catch (error) {
+            this.log(
+              `Error processing all preloaded audio: ${error.message}`,
+              "error"
+            );
+          }
+        }
+
+        async loadFromArrayBuffer() {
+          const file = this.elements.arrayBufferFile.files[0];
+          if (!file) {
+            this.log("No file selected for ArrayBuffer loading", "warning");
+            return;
+          }
+
+          this.log(`Loading ArrayBuffer: ${file.name}...`, "info");
+
+          try {
+            // Convert file to ArrayBuffer first
+            const arrayBuffer = await file.arrayBuffer();
+            this.log(
+              `File converted to ArrayBuffer (${arrayBuffer.byteLength} bytes)`,
+              "info"
+            );
+
+            // Use loadFromArrayBuffer method
+            const success = await this.audioMark.loadFromArrayBuffer(
+              "arrayBufferTest",
+              arrayBuffer
+            );
+            if (success) {
+              this.log(
+                `Successfully loaded from ArrayBuffer: ${file.name}`,
+                "success"
+              );
+              this.updateArrayBufferButtonState();
+            } else {
+              this.log(
+                `Failed to load from ArrayBuffer: ${file.name}`,
+                "error"
+              );
+            }
+          } catch (error) {
+            this.log(
+              `Error loading from ArrayBuffer: ${error.message}`,
+              "error"
+            );
+          }
+        }
+
+        playArrayBufferTest() {
+          if (
+            !this.audioMark.getState().loadedAudio.includes("arrayBufferTest")
+          ) {
+            this.log("ArrayBuffer test audio not loaded", "warning");
+            return;
+          }
+
+          this.log("Playing ArrayBuffer test audio...", "info");
+          this.audioMark.playSFX("arrayBufferTest");
+        }
+
+        updatePreloadedCount() {
+          const count = this.audioMark.getState().preloadedAudio.length;
+          this.elements.preloadedCount.textContent = count;
+          this.elements.preloadedCount.style.color =
+            count > 0 ? "#10b981" : "#7c3aed";
+        }
+      }
+
+      // Initialize the tester when the page loads
+      document.addEventListener("DOMContentLoaded", () => {
+        window.audioMarkTester = new MarkJSAudioTester();
+      });
+    </script>
+  </body>
+</html>
