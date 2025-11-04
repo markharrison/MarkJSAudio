@@ -74,7 +74,7 @@ See the [complete documentation](markjsaudio.md) for detailed usage instructions
 Open `index.html` in your browser to see the comprehensive test interface with:
 
 - File loading and unloading
-- **ArrayBuffer & Preloading functionality** - Test the new preload/process workflow
+- ArrayBuffer & Preloading functionality - Test the new preload/process workflow
 - Music and SFX playback controls
 - Volume controls
 - Smooth music transitions
