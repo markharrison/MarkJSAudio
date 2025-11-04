@@ -1,26 +1,26 @@
 {
-    "name": "@markharrison/markjsaudio",
-    "version": "1.0.0",
-    "description": "A reusable audio system for web applications.",
-    "main": "markjsaudio.js",
-    "exports": {
-        ".": "./markjsaudio.js",
-        "./markjsaudio": "./markjsaudio.js"
-    },
-    "files": [
-        "markjsaudio.js",
-        "markjsaudio.md",
-        "README.md",
-        "LICENSE"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/markharrison/MarkJSaudio.git"
-    },
-    "author": "Mark Harrison",
-    "license": "MIT",
-    "publishConfig": {
-        "registry": "https://registry.npmjs.org/",
-        "access": "public"
-    }
+  "name": "@markharrison/markjsaudio",
+  "version": "1.20251104.2",
+  "description": "A reusable audio system for web applications.",
+  "main": "markjsaudio.js",
+  "exports": {
+    ".": "./markjsaudio.js",
+    "./markjsaudio": "./markjsaudio.js"
+  },
+  "files": [
+    "markjsaudio.js",
+    "markjsaudio.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markharrison/MarkJSaudio.git"
+  },
+  "author": "Mark Harrison",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  }
 }
