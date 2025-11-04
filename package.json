@@ -22,5 +22,16 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
-  }
+  },
+  "keywords": [
+    "gamedev",
+    "game-development",
+    "game-audio",
+    "web-audio-api",
+    "web-audio",
+    "audio-engine",
+    "sound",
+    "javascript",
+    "markharrison"
+  ]
 }
