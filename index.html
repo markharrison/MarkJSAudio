@@ -437,19 +437,17 @@
           </p>
 
           <div class="file-input-group">
-            <label for="preloadFile">Test File for Preloading:</label>
+            <label for="preloadFile">Test File(s) for Preloading:</label>
             <input
               type="file"
               id="preloadFile"
               class="file-input"
               accept=".mp3,.wav"
+              multiple
               disabled
             />
             <div class="control-grid">
               <button id="preloadBtn" class="button" disabled>Preload</button>
-              <button id="processPreloadBtn" class="button success" disabled>
-                Process Preloaded
-              </button>
               <button
                 id="processAllPreloadBtn"
                 class="button secondary"
@@ -482,6 +480,14 @@
               >
                 Play ArrayBuffer Test
               </button>
+            </div>
+          </div>
+
+          <!-- New container for playable preloaded files -->
+          <div id="preloadedListContainer" style="margin-top: 15px; display: none;">
+            <h4 style="margin-bottom: 10px; color: #374151">Play Processed Files:</h4>
+            <div id="preloadedList" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Items will be added here dynamically -->
             </div>
           </div>
 
@@ -730,7 +736,6 @@
             // ArrayBuffer & Preloading controls
             preloadFile: document.getElementById("preloadFile"),
             preloadBtn: document.getElementById("preloadBtn"),
-            processPreloadBtn: document.getElementById("processPreloadBtn"),
             processAllPreloadBtn: document.getElementById(
               "processAllPreloadBtn"
             ),
@@ -864,9 +869,6 @@
           );
           this.elements.preloadBtn.addEventListener("click", () =>
             this.preloadFile()
-          );
-          this.elements.processPreloadBtn.addEventListener("click", () =>
-            this.processPreloadedFile()
           );
           this.elements.processAllPreloadBtn.addEventListener("click", () =>
             this.processAllPreloaded()
@@ -1273,22 +1275,9 @@
         // ArrayBuffer & Preloading methods
 
         updatePreloadButtonState() {
-          const file = this.elements.preloadFile.files[0];
+          const files = this.elements.preloadFile.files;
           // Enable preload button when file is selected (works before MarkJSAudio initialization)
-          this.elements.preloadBtn.disabled = !file;
-
-          // Check if we have preloaded this file (only works after MarkJSAudio is created)
-          const filename = file ? file.name.replace(/\.[^/.]+$/, "") : null;
-          let hasPreloaded = false;
-          try {
-            hasPreloaded =
-              filename &&
-              this.audioMark.getState().preloadedAudio.includes(filename);
-          } catch (e) {
-            // MarkJSAudio might not be initialized yet, that's OK for preloading
-            hasPreloaded = false;
-          }
-          this.elements.processPreloadBtn.disabled = !hasPreloaded;
+          this.elements.preloadBtn.disabled = !files || files.length === 0;
         }
 
         updateArrayBufferButtonState() {
@@ -1317,64 +1306,35 @@
         }
 
         async preloadFile() {
-          const file = this.elements.preloadFile.files[0];
-          if (!file) {
-            this.log("No file selected for preloading", "warning");
+          const files = this.elements.preloadFile.files;
+          if (!files || files.length === 0) {
+            this.log("No files selected for preloading", "warning");
             return;
           }
 
-          const filename = file.name.replace(/\.[^/.]+$/, ""); // Remove extension for name
-          this.log(`Preloading ${filename}: ${file.name}...`, "info");
+          this.log(`Preloading ${files.length} file(s)...`, "info");
 
-          try {
-            const success = await this.audioMark.preloadAudio(filename, file);
-            if (success) {
-              this.log(
-                `Successfully preloaded ${filename} (raw data stored)`,
-                "success"
-              );
-              this.updatePreloadButtonState();
-              this.updatePreloadedCount();
-            } else {
-              this.log(`Failed to preload ${filename}`, "error");
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const filename = file.name.replace(/\.[^/.]+$/, ""); // Remove extension for name
+            
+            try {
+              // We don't await here so they can start in parallel (testing the race condition fix)
+              this.audioMark.preloadAudio(filename, file).then(success => {
+                if (success) {
+                  this.log(
+                    `Successfully preloaded ${filename} (raw data stored)`,
+                    "success"
+                  );
+                  this.updatePreloadButtonState();
+                  this.updatePreloadedCount();
+                } else {
+                  this.log(`Failed to preload ${filename}`, "error");
+                }
+              });
+            } catch (error) {
+              this.log(`Error preloading ${filename}: ${error.message}`, "error");
             }
-          } catch (error) {
-            this.log(`Error preloading ${filename}: ${error.message}`, "error");
-          }
-        }
-
-        async processPreloadedFile() {
-          const file = this.elements.preloadFile.files[0];
-          if (!file) {
-            this.log("No file selected", "warning");
-            return;
-          }
-
-          const filename = file.name.replace(/\.[^/.]+$/, "");
-          this.log(`Processing preloaded audio: ${filename}...`, "info");
-
-          try {
-            const success = await this.audioMark.processPreloadedAudio(
-              filename
-            );
-            if (success) {
-              this.log(
-                `Successfully processed preloaded audio: ${filename}`,
-                "success"
-              );
-              this.updatePreloadButtonState();
-              this.updatePreloadedCount();
-            } else {
-              this.log(
-                `Failed to process preloaded audio: ${filename}`,
-                "error"
-              );
-            }
-          } catch (error) {
-            this.log(
-              `Error processing preloaded audio: ${error.message}`,
-              "error"
-            );
           }
         }
 
@@ -1467,6 +1427,75 @@
           this.elements.preloadedCount.textContent = count;
           this.elements.preloadedCount.style.color =
             count > 0 ? "#10b981" : "#7c3aed";
+          
+          this.updatePlayableList();
+        }
+
+        updatePlayableList() {
+          const loadedAudio = this.audioMark.getState().loadedAudio;
+          const standardKeys = ["music1", "music2", "sfx1", "sfx2", "sfx3", "arrayBufferTest"];
+          const customKeys = loadedAudio.filter(key => !standardKeys.includes(key));
+          
+          const container = document.getElementById("preloadedListContainer");
+          const list = document.getElementById("preloadedList");
+          
+          if (customKeys.length === 0) {
+            container.style.display = "none";
+            list.innerHTML = "";
+            return;
+          }
+          
+          container.style.display = "block";
+          list.innerHTML = "";
+          
+          customKeys.forEach(key => {
+            const item = document.createElement("div");
+            item.style.display = "flex";
+            item.style.alignItems = "center";
+            item.style.justifyContent = "space-between";
+            item.style.background = "#fff";
+            item.style.padding = "8px";
+            item.style.borderRadius = "6px";
+            item.style.border = "1px solid #e5e7eb";
+            
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = key;
+            nameSpan.style.fontWeight = "600";
+            
+            const btnGroup = document.createElement("div");
+            btnGroup.style.display = "flex";
+            btnGroup.style.gap = "5px";
+            
+            const playSfxBtn = document.createElement("button");
+            playSfxBtn.textContent = "Play SFX";
+            playSfxBtn.className = "button success";
+            playSfxBtn.style.padding = "5px 10px";
+            playSfxBtn.style.fontSize = "12px";
+            playSfxBtn.style.margin = "0";
+            playSfxBtn.onclick = () => {
+               this.log(`Playing custom SFX: ${key}`, "info");
+               this.audioMark.playSFX(key);
+            };
+            
+            const playMusicBtn = document.createElement("button");
+            playMusicBtn.textContent = "Play Music";
+            playMusicBtn.className = "button";
+            playMusicBtn.style.padding = "5px 10px";
+            playMusicBtn.style.fontSize = "12px";
+            playMusicBtn.style.margin = "0";
+            playMusicBtn.onclick = () => {
+               this.log(`Playing custom Music: ${key}`, "info");
+               this.audioMark.playMusic(key, { loop: true });
+               this.currentMusicTrack = key;
+            };
+            
+            btnGroup.appendChild(playSfxBtn);
+            btnGroup.appendChild(playMusicBtn);
+            
+            item.appendChild(nameSpan);
+            item.appendChild(btnGroup);
+            list.appendChild(item);
+          });
         }
       }
 
