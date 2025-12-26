@@ -1,6 +1,6 @@
 {
   "name": "@markharrison/markjsaudio",
-  "version": "1.20251226.5",
+  "version": "1.20251226.6",
   "description": "A reusable audio system for web applications.",
   "main": "markjsaudio.js",
   "exports": {
