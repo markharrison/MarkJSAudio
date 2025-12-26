@@ -38,8 +38,8 @@ MarkJSAudio provides a preloading workflow that elegantly solves this problem:
 ```javascript
 // Phase 1: During app initialization (before any user interaction)
 const audioMark = new MarkJSAudio();
-await audioMark.preloadAudio("theme", "assets/theme.mp3");
-await audioMark.preloadAudio("click", "assets/click.wav");
+await audioMark.preloadAudio('theme', 'assets/theme.mp3');
+await audioMark.preloadAudio('click', 'assets/click.wav');
 // Raw bytes are fetched and stored, but not decoded yet
 
 // Phase 2: After user clicks "Start Game"
@@ -47,7 +47,7 @@ await audioMark.initialize(); // Creates AudioContext
 await audioMark.processAllPreloadedAudio(); // Decodes all preloaded audio
 
 // Phase 3: Audio is immediately available
-audioMark.playMusic("theme"); // Plays instantly, no loading delay
+audioMark.playMusic('theme'); // Plays instantly, no loading delay
 ```
 
 ### Key Benefits
@@ -69,14 +69,14 @@ Simply include the MarkJSAudio library in your project:
 
 ```html
 <script type="module">
-  import { MarkJSAudio } from "@markharrison/markjsaudio";
+  import { MarkJSAudio } from '@markharrison/markjsaudio';
 </script>
 ```
 
 ## Quick Start
 
 ```javascript
-import { MarkJSAudio } from "@markharrison/markjsaudio";
+import { MarkJSAudio } from '@markharrison/markjsaudio';
 
 // Create MarkJSAudio instance
 const audioMark = new MarkJSAudio();
@@ -85,19 +85,19 @@ const audioMark = new MarkJSAudio();
 await audioMark.initialize();
 
 // Load audio files
-await audioMark.loadAudio("bgmusic", "path/to/music.mp3");
-await audioMark.loadAudio("jump", "path/to/jump.wav");
+await audioMark.loadAudio('bgmusic', 'path/to/music.mp3');
+await audioMark.loadAudio('jump', 'path/to/jump.wav');
 
 // Play background music with loop
-audioMark.playMusic("bgmusic", { loop: true });
+audioMark.playMusic('bgmusic', { loop: true });
 
 // Play sound effect
-audioMark.playSFX("jump");
+audioMark.playSFX('jump');
 
 // Control volumes (0-100) - music and SFX are multiplied by master
-audioMark.setVolume("master", 80); // 80% master volume
-audioMark.setVolume("music", 60); // Effective: 60% × 80% = 48%
-audioMark.setVolume("sfx", 90); // Effective: 90% × 80% = 72%
+audioMark.setVolume('master', 80); // 80% master volume
+audioMark.setVolume('music', 60); // Effective: 60% × 80% = 48%
+audioMark.setVolume('sfx', 90); // Effective: 90% × 80% = 72%
 ```
 
 ## API Reference
@@ -124,7 +124,7 @@ Initializes the audio context and sets up gain nodes. Must be called after user 
 // Call after user interaction (click, keypress, etc.)
 const success = await audioMark.initialize();
 if (success) {
-  console.log("MarkJSAudio ready!");
+  console.log('MarkJSAudio ready!');
 }
 ```
 
@@ -145,28 +145,28 @@ if (success) {
 
 ```javascript
 // Traditional URL loading
-await audioMark.loadAudio("bgmusic", "assets/background.mp3");
+await audioMark.loadAudio('bgmusic', 'assets/background.mp3');
 
 // File input handling
-const fileInput = document.getElementById("audio-upload");
-fileInput.addEventListener("change", async (event) => {
+const fileInput = document.getElementById('audio-upload');
+fileInput.addEventListener('change', async (event) => {
   const file = event.target.files[0];
   if (file) {
-    await audioMark.loadAudio("user-audio", file);
-    console.log("User audio loaded and ready to play");
+    await audioMark.loadAudio('user-audio', file);
+    console.log('User audio loaded and ready to play');
   }
 });
 
 // ArrayBuffer loading (convenience wrapper)
-const response = await fetch("assets/sound.wav");
+const response = await fetch('assets/sound.wav');
 const arrayBuffer = await response.arrayBuffer();
-await audioMark.loadAudio("sound", arrayBuffer);
+await audioMark.loadAudio('sound', arrayBuffer);
 
 // Mixed loading types in sequence
 const audioSources = [
-  { name: "theme", source: "assets/theme.mp3" },
-  { name: "user-upload", source: userFile },
-  { name: "generated", source: generatedAudioBuffer },
+  { name: 'theme', source: 'assets/theme.mp3' },
+  { name: 'user-upload', source: userFile },
+  { name: 'generated', source: generatedAudioBuffer },
 ];
 
 for (const { name, source } of audioSources) {
@@ -187,9 +187,9 @@ Loads audio directly from an ArrayBuffer. Useful when you already have raw audio
 
 ```javascript
 // Fetch and load in one step
-const response = await fetch("assets/music.mp3");
+const response = await fetch('assets/music.mp3');
 const arrayBuffer = await response.arrayBuffer();
-await audioMark.loadFromArrayBuffer("music", arrayBuffer);
+await audioMark.loadFromArrayBuffer('music', arrayBuffer);
 ```
 
 #### `preloadAudio(name, source): Promise<boolean>`
@@ -212,21 +212,21 @@ class GameLoader {
     const audioMark = new MarkJSAudio();
 
     // Fetch audio files during loading (no AudioContext needed)
-    console.log("Fetching audio assets...");
-    await audioMark.preloadAudio("bgmusic", "assets/battle-theme.mp3");
-    await audioMark.preloadAudio("victory", "assets/victory-fanfare.mp3");
-    await audioMark.preloadAudio("jump", "assets/sfx/jump.wav");
-    await audioMark.preloadAudio("coin", "assets/sfx/coin-collect.wav");
+    console.log('Fetching audio assets...');
+    await audioMark.preloadAudio('bgmusic', 'assets/battle-theme.mp3');
+    await audioMark.preloadAudio('victory', 'assets/victory-fanfare.mp3');
+    await audioMark.preloadAudio('jump', 'assets/sfx/jump.wav');
+    await audioMark.preloadAudio('coin', 'assets/sfx/coin-collect.wav');
 
-    console.log("Audio assets fetched (ready for processing)");
+    console.log('Audio assets fetched (ready for processing)');
     return audioMark;
   }
 }
 
 // Progressive Web App example
-if ("serviceWorker" in navigator) {
+if ('serviceWorker' in navigator) {
   // Preload audio even before service worker is ready
-  await audioMark.preloadAudio("startup", "assets/app-sounds/startup.mp3");
+  await audioMark.preloadAudio('startup', 'assets/app-sounds/startup.mp3');
 }
 ```
 
@@ -248,16 +248,16 @@ async function initializeGameAudio(gameMode, audioMark) {
   await audioMark.initialize(); // AudioContext now available
 
   // Always process essential audio
-  await audioMark.processPreloadedAudio("bgmusic");
-  await audioMark.processPreloadedAudio("jump");
+  await audioMark.processPreloadedAudio('bgmusic');
+  await audioMark.processPreloadedAudio('jump');
 
   // Process mode-specific audio
-  if (gameMode === "adventure") {
-    await audioMark.processPreloadedAudio("forest-ambient");
-    await audioMark.processPreloadedAudio("sword-clang");
-  } else if (gameMode === "puzzle") {
-    await audioMark.processPreloadedAudio("puzzle-complete");
-    await audioMark.processPreloadedAudio("piece-place");
+  if (gameMode === 'adventure') {
+    await audioMark.processPreloadedAudio('forest-ambient');
+    await audioMark.processPreloadedAudio('sword-clang');
+  } else if (gameMode === 'puzzle') {
+    await audioMark.processPreloadedAudio('puzzle-complete');
+    await audioMark.processPreloadedAudio('piece-place');
   }
 }
 
@@ -267,18 +267,23 @@ async function safeProcessAudio(audioMark, audioName) {
   if (!success) {
     console.warn(`Failed to process ${audioName}, using fallback`);
     // Load fallback audio or use default sounds
-    await audioMark.loadAudio(audioName, "assets/fallback/default.wav");
+    await audioMark.loadAudio(audioName, 'assets/fallback/default.wav');
   }
 }
 ```
 
 #### `processAllPreloadedAudio(): Promise<Array>`
 
-**Processes all preloaded audio files at once.** This is the most common pattern - fetch everything during loading, then decode everything after user interaction.
+#### `processAllPreloadedAudio(): Promise<{ preloadsOk: boolean, results: Array<{name, success}> }>`
 
-**Returns**: Promise that resolves to an array of results. Each result object contains `{name, success}` where `name` is the audio identifier and `success` is a boolean indicating if processing was successful.
+**Processes all preloaded audio files at once.** This is the most common pattern—fetch everything during loading, then decode everything after user interaction.
 
-**When to use**: Most common use case - process all preloaded audio after AudioContext initialization.
+**Returns**: Promise that resolves to an object:
+
+- `preloadsOk` (boolean): Indicates if all preloads completed successfully
+- `results` (Array): Each result object contains `{name, success}` where `name` is the audio identifier and `success` is a boolean indicating if processing was successful
+
+**When to use**: Most common use case—process all preloaded audio after AudioContext initialization.
 
 ```javascript
 // Complete game initialization example
@@ -291,12 +296,12 @@ class Game {
   async preloadAssets() {
     // Phase 1: Preload during splash screen
     const audioFiles = [
-      { name: "theme", url: "assets/music/main-theme.mp3" },
-      { name: "level1", url: "assets/music/level1-bg.mp3" },
-      { name: "victory", url: "assets/music/victory.mp3" },
-      { name: "jump", url: "assets/sfx/jump.wav" },
-      { name: "coin", url: "assets/sfx/coin.wav" },
-      { name: "powerup", url: "assets/sfx/powerup.wav" },
+      { name: 'theme', url: 'assets/music/main-theme.mp3' },
+      { name: 'level1', url: 'assets/music/level1-bg.mp3' },
+      { name: 'victory', url: 'assets/music/victory.mp3' },
+      { name: 'jump', url: 'assets/sfx/jump.wav' },
+      { name: 'coin', url: 'assets/sfx/coin.wav' },
+      { name: 'powerup', url: 'assets/sfx/powerup.wav' },
     ];
 
     for (const { name, url } of audioFiles) {
@@ -309,7 +314,7 @@ class Game {
     await this.audioMark.initialize();
 
     // Process all preloaded audio
-    const results = await this.audioMark.processAllPreloadedAudio();
+    const { preloadsOk, results } = await this.audioMark.processAllPreloadedAudio();
 
     // Log results and handle any failures
     let successCount = 0;
@@ -322,14 +327,16 @@ class Game {
       }
     });
 
-    console.log(
-      `Audio initialization: ${successCount}/${results.length} files ready`
-    );
-    this.audioReady = successCount > 0;
+    if (!preloadsOk) {
+      console.error('Some audio preloads failed.');
+    }
+
+    console.log(`Audio initialization: ${successCount}/${results.length} files ready`);
+    this.audioReady = successCount > 0 && preloadsOk;
 
     // Start background music immediately (no loading delay!)
     if (this.audioReady) {
-      this.audioMark.playMusic("theme", { loop: true, fadeIn: 1.0 });
+      this.audioMark.playMusic('theme', { loop: true, fadeIn: 1.0 });
     }
   }
 }
@@ -374,7 +381,7 @@ async function loadAudioFromAPI(audioMark, userId, audioType) {
 async function loadEncryptedAudio(audioMark, encryptedFile, decryptionKey) {
   // Decrypt the audio data (pseudo-code)
   const decryptedBuffer = await decrypt(encryptedFile, decryptionKey);
-  await audioMark.loadFromArrayBuffer("secret-audio", decryptedBuffer);
+  await audioMark.loadFromArrayBuffer('secret-audio', decryptedBuffer);
 }
 
 // Generated audio example
@@ -393,7 +400,7 @@ function generateTone(frequency, duration, sampleRate = 44100) {
 
 // Use generated audio
 const toneBuffer = generateTone(440, 0.5); // A4 for 0.5 seconds
-await audioMark.loadFromArrayBuffer("notification-tone", toneBuffer);
+await audioMark.loadFromArrayBuffer('notification-tone', toneBuffer);
 
 // IndexedDB caching example
 class AudioCache {
@@ -441,7 +448,7 @@ Removes audio from memory.
 **Returns**: `true` if successfully unloaded, `false` if audio was not found.
 
 ```javascript
-audioMark.unloadAudio("bgmusic");
+audioMark.unloadAudio('bgmusic');
 ```
 
 ### Sound Effects (SFX)
@@ -462,10 +469,10 @@ Plays a sound effect. SFX are optimized for short, frequent playback with low la
 
 ```javascript
 // Simple SFX playback
-audioMark.playSFX("jump");
+audioMark.playSFX('jump');
 
 // SFX with options
-audioMark.playSFX("engine", {
+audioMark.playSFX('engine', {
   loop: true,
   volume: 0.7,
   fadeIn: 0.5,
@@ -491,10 +498,10 @@ Plays background music with full control options.
 
 ```javascript
 // Play looping background music
-audioMark.playMusic("level1theme");
+audioMark.playMusic('level1theme');
 
 // Play with fade-in
-audioMark.playMusic("level2theme", {
+audioMark.playMusic('level2theme', {
   fadeIn: 2.0,
   volume: 0.8,
 });
@@ -542,7 +549,7 @@ Smoothly transitions from current music to a new track with crossfading.
 
 ```javascript
 // Smooth 3-second transition to new track
-await audioMark.transitionMusic("level2theme", 3.0, {
+await audioMark.transitionMusic('level2theme', 3.0, {
   loop: true,
   volume: 0.9,
 });
@@ -560,9 +567,9 @@ Sets volume for master, music, or SFX channels. **Note**: Music and SFX volumes 
 - `volume` (number): Volume from 0 (silent) to 100 (full volume)
 
 ```javascript
-audioMark.setVolume("master", 80); // 80% master volume
-audioMark.setVolume("music", 60); // Effective music volume: 60% × 80% = 48%
-audioMark.setVolume("sfx", 90); // Effective SFX volume: 90% × 80% = 72%
+audioMark.setVolume('master', 80); // 80% master volume
+audioMark.setVolume('music', 60); // Effective music volume: 60% × 80% = 48%
+audioMark.setVolume('sfx', 90); // Effective SFX volume: 90% × 80% = 72%
 ```
 
 #### `getVolume(type): number`
@@ -576,7 +583,7 @@ Gets current volume setting.
 **Returns**: Current volume (0-100).
 
 ```javascript
-const musicVolume = audioMark.getVolume("music");
+const musicVolume = audioMark.getVolume('music');
 ```
 
 ### Advanced Features
@@ -593,7 +600,7 @@ Fades out a specific audio source.
 **Note**: This method reconnects the audio source through a new gain node for fading. The source will be routed through the music gain channel during fade-out.
 
 ```javascript
-const sfxSource = audioMark.playSFX("explosion");
+const sfxSource = audioMark.playSFX('explosion');
 // Fade out after 2 seconds
 setTimeout(() => {
   audioMark.fadeOut(sfxSource, 1.5);
@@ -626,9 +633,9 @@ Returns current state information for debugging and monitoring.
 
 ```javascript
 const state = audioMark.getState();
-console.log("Loaded audio:", state.loadedAudio);
-console.log("Active sources:", state.activeSources);
-console.log("Current music:", state.currentMusic);
+console.log('Loaded audio:', state.loadedAudio);
+console.log('Active sources:', state.activeSources);
+console.log('Current music:', state.currentMusic);
 ```
 
 ## Usage Patterns
@@ -642,25 +649,25 @@ class GameScene {
     await this.audioMark.initialize();
 
     // Load scene-specific audio
-    await this.audioMark.loadAudio("bgmusic", "assets/level1.mp3");
-    await this.audioMark.loadAudio("jump", "assets/jump.wav");
-    await this.audioMark.loadAudio("coin", "assets/coin.wav");
+    await this.audioMark.loadAudio('bgmusic', 'assets/level1.mp3');
+    await this.audioMark.loadAudio('jump', 'assets/jump.wav');
+    await this.audioMark.loadAudio('coin', 'assets/coin.wav');
 
     // Start background music
-    this.audioMark.playMusic("bgmusic");
+    this.audioMark.playMusic('bgmusic');
   }
 
   onPlayerJump() {
-    this.audioMark.playSFX("jump");
+    this.audioMark.playSFX('jump');
   }
 
   onCoinCollect() {
-    this.audioMark.playSFX("coin", { volume: 0.7 });
+    this.audioMark.playSFX('coin', { volume: 0.7 });
   }
 
   async switchToLevel2() {
-    await this.audioMark.loadAudio("level2music", "assets/level2.mp3");
-    await this.audioMark.transitionMusic("level2music", 2.0);
+    await this.audioMark.loadAudio('level2music', 'assets/level2.mp3');
+    await this.audioMark.transitionMusic('level2music', 2.0);
   }
 
   cleanup() {
@@ -682,21 +689,21 @@ class GameApp {
 
   // Called during app initialization (before user interaction)
   async preloadAssets() {
-    console.log("Preloading audio assets...");
+    console.log('Preloading audio assets...');
 
     // Fetch raw audio data before user interaction
-    await this.audioMark.preloadAudio("theme", "assets/theme.mp3");
-    await this.audioMark.preloadAudio("click", "assets/click.wav");
-    await this.audioMark.preloadAudio("success", "assets/success.wav");
+    await this.audioMark.preloadAudio('theme', 'assets/theme.mp3');
+    await this.audioMark.preloadAudio('click', 'assets/click.wav');
+    await this.audioMark.preloadAudio('success', 'assets/success.wav');
 
     this.assetsLoaded = true;
-    console.log("Assets preloaded (raw data ready)");
+    console.log('Assets preloaded (raw data ready)');
   }
 
   // Called after user interaction (when AudioContext can be created)
   async initializeAudio() {
     if (!this.assetsLoaded) {
-      throw new Error("Call preloadAssets() first");
+      throw new Error('Call preloadAssets() first');
     }
 
     // Initialize AudioContext (requires user interaction)
@@ -705,26 +712,26 @@ class GameApp {
     // Process all preloaded audio (decode raw data)
     const results = await this.audioMark.processAllPreloadedAudio();
 
-    console.log("Audio processing complete:");
+    console.log('Audio processing complete:');
     results.forEach((result) => {
-      console.log(`${result.name}: ${result.success ? "OK" : "FAILED"}`);
+      console.log(`${result.name}: ${result.success ? 'OK' : 'FAILED'}`);
     });
 
     // Start background music immediately (no loading delay)
-    this.audioMark.playMusic("theme", { loop: true });
+    this.audioMark.playMusic('theme', { loop: true });
   }
 
   // Alternative: Direct ArrayBuffer usage
   async loadFromCustomSource() {
     // Fetch audio from custom endpoint
-    const response = await fetch("/api/user-audio/123");
+    const response = await fetch('/api/user-audio/123');
     const audioData = await response.arrayBuffer();
 
     // Load directly from ArrayBuffer
-    await this.audioMark.loadFromArrayBuffer("custom", audioData);
+    await this.audioMark.loadFromArrayBuffer('custom', audioData);
 
     // Play immediately
-    this.audioMark.playSFX("custom");
+    this.audioMark.playSFX('custom');
   }
 }
 
@@ -735,7 +742,7 @@ const app = new GameApp();
 await app.preloadAssets();
 
 // After user clicks "Start Game" button
-document.getElementById("startBtn").onclick = async () => {
+document.getElementById('startBtn').onclick = async () => {
   await app.initializeAudio();
   // Game can start immediately with no audio loading delays
 };
@@ -749,37 +756,37 @@ This pattern shows how to implement a sophisticated loading strategy that balanc
 class ProgressiveAudioLoader {
   constructor() {
     this.audioMark = new MarkJSAudio();
-    this.criticalAudio = new Set(["ui-click", "error", "success"]);
-    this.backgroundAudio = new Set(["ambient", "music-layers"]);
-    this.gameplayAudio = new Set(["player-actions", "environment"]);
+    this.criticalAudio = new Set(['ui-click', 'error', 'success']);
+    this.backgroundAudio = new Set(['ambient', 'music-layers']);
+    this.gameplayAudio = new Set(['player-actions', 'environment']);
   }
 
   // Phase 1: Load critical UI audio immediately
   async loadCriticalAudio() {
-    console.log("Loading critical audio...");
-    await this.audioMark.preloadAudio("ui-click", "assets/ui/click.wav");
-    await this.audioMark.preloadAudio("error", "assets/ui/error.wav");
-    await this.audioMark.preloadAudio("success", "assets/ui/success.wav");
+    console.log('Loading critical audio...');
+    await this.audioMark.preloadAudio('ui-click', 'assets/ui/click.wav');
+    await this.audioMark.preloadAudio('error', 'assets/ui/error.wav');
+    await this.audioMark.preloadAudio('success', 'assets/ui/success.wav');
   }
 
   // Phase 2: Load background audio while user reads instructions
   async loadBackgroundAudio() {
-    console.log("Loading background audio...");
+    console.log('Loading background audio...');
     const promises = [
-      this.audioMark.preloadAudio("ambient", "assets/ambient/forest.mp3"),
-      this.audioMark.preloadAudio("music-menu", "assets/music/menu-theme.mp3"),
-      this.audioMark.preloadAudio("music-game", "assets/music/game-theme.mp3"),
+      this.audioMark.preloadAudio('ambient', 'assets/ambient/forest.mp3'),
+      this.audioMark.preloadAudio('music-menu', 'assets/music/menu-theme.mp3'),
+      this.audioMark.preloadAudio('music-game', 'assets/music/game-theme.mp3'),
     ];
     await Promise.all(promises);
   }
 
   // Phase 3: Load gameplay audio just before game starts
   async loadGameplayAudio() {
-    console.log("Loading gameplay audio...");
+    console.log('Loading gameplay audio...');
     const promises = [
-      this.audioMark.preloadAudio("jump", "assets/sfx/jump.wav"),
-      this.audioMark.preloadAudio("collect", "assets/sfx/collect.wav"),
-      this.audioMark.preloadAudio("damage", "assets/sfx/damage.wav"),
+      this.audioMark.preloadAudio('jump', 'assets/sfx/jump.wav'),
+      this.audioMark.preloadAudio('collect', 'assets/sfx/collect.wav'),
+      this.audioMark.preloadAudio('damage', 'assets/sfx/damage.wav'),
     ];
     await Promise.all(promises);
   }
@@ -789,9 +796,9 @@ class ProgressiveAudioLoader {
     await this.audioMark.initialize();
 
     // Process critical audio first
-    await this.audioMark.processPreloadedAudio("ui-click");
-    await this.audioMark.processPreloadedAudio("error");
-    await this.audioMark.processPreloadedAudio("success");
+    await this.audioMark.processPreloadedAudio('ui-click');
+    await this.audioMark.processPreloadedAudio('error');
+    await this.audioMark.processPreloadedAudio('success');
 
     // Process remaining audio in background
     this.processRemainingAudio();
@@ -813,7 +820,7 @@ await loader.loadCriticalAudio();
 await loader.loadBackgroundAudio();
 
 // User clicks "Start Game"
-document.getElementById("startBtn").onclick = async () => {
+document.getElementById('startBtn').onclick = async () => {
   await loader.loadGameplayAudio();
   await loader.initialize();
   // All audio ready, start game
@@ -835,13 +842,13 @@ class CustomAudioIntegration {
   // Load audio from different sources
   async loadAudioFromSource(name, source) {
     switch (source.type) {
-      case "api":
+      case 'api':
         return await this.loadFromAPI(name, source);
-      case "generated":
+      case 'generated':
         return await this.loadGeneratedAudio(name, source);
-      case "encrypted":
+      case 'encrypted':
         return await this.loadEncryptedAudio(name, source);
-      case "blob":
+      case 'blob':
         return await this.loadFromBlob(name, source);
       default:
         return await this.audioMark.loadAudio(name, source.url);
@@ -864,7 +871,7 @@ class CustomAudioIntegration {
     const response = await fetch(source.endpoint, {
       headers: {
         Authorization: `Bearer ${this.apiToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -907,10 +914,10 @@ class CustomAudioIntegration {
       }
     };
 
-    writeString(0, "RIFF");
+    writeString(0, 'RIFF');
     view.setUint32(4, fileSize - 8, true);
-    writeString(8, "WAVE");
-    writeString(12, "fmt ");
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
     view.setUint32(16, 16, true); // fmt chunk size
     view.setUint16(20, 1, true); // PCM format
     view.setUint16(22, 1, true); // mono
@@ -918,7 +925,7 @@ class CustomAudioIntegration {
     view.setUint32(28, sampleRate * 2, true);
     view.setUint16(32, 2, true); // block align
     view.setUint16(34, 16, true); // bits per sample
-    writeString(36, "data");
+    writeString(36, 'data');
     view.setUint32(40, dataSize, true);
 
     // Generate audio samples
@@ -927,13 +934,13 @@ class CustomAudioIntegration {
       const t = i / sampleRate;
 
       switch (type) {
-        case "sine":
+        case 'sine':
           sample = Math.sin(2 * Math.PI * frequency * t);
           break;
-        case "square":
+        case 'square':
           sample = Math.sin(2 * Math.PI * frequency * t) > 0 ? 1 : -1;
           break;
-        case "noise":
+        case 'noise':
           sample = Math.random() * 2 - 1;
           break;
         default:
@@ -975,22 +982,22 @@ class CustomAudioIntegration {
 }
 
 // Usage examples
-const integration = new CustomAudioIntegration("your-api-token");
+const integration = new CustomAudioIntegration('your-api-token');
 
-await integration.loadAudioFromSource("background", {
-  type: "api",
-  endpoint: "https://api.example.com/audio/background",
+await integration.loadAudioFromSource('background', {
+  type: 'api',
+  endpoint: 'https://api.example.com/audio/background',
 });
 
-await integration.loadAudioFromSource("notification", {
-  type: "generated",
-  config: { frequency: 800, duration: 0.3, type: "sine" },
+await integration.loadAudioFromSource('notification', {
+  type: 'generated',
+  config: { frequency: 800, duration: 0.3, type: 'sine' },
 });
 
-await integration.loadAudioFromSource("secret", {
-  type: "encrypted",
-  url: "assets/encrypted/secret.bin",
-  key: "encryption-key",
+await integration.loadAudioFromSource('secret', {
+  type: 'encrypted',
+  url: 'assets/encrypted/secret.bin',
+  key: 'encryption-key',
 });
 ```
 
@@ -1015,9 +1022,7 @@ class DynamicAudioManager {
     }
 
     console.log(`Preloading audio for region: ${regionName}`);
-    const promises = audioList.map(({ name, url }) =>
-      this.audioMark.preloadAudio(`${regionName}-${name}`, url)
-    );
+    const promises = audioList.map(({ name, url }) => this.audioMark.preloadAudio(`${regionName}-${name}`, url));
 
     await Promise.all(promises);
     this.preloadedRegions.add(regionName);
@@ -1032,15 +1037,11 @@ class DynamicAudioManager {
 
     // Fade out current region music
     if (this.activeRegion) {
-      this.audioMark.setVolume("music", 0); // Quick fade for demo
+      this.audioMark.setVolume('music', 0); // Quick fade for demo
     }
 
     // Process new region audio
-    const regionAudio = audioList.filter((audio) =>
-      this.audioMark
-        .getState()
-        .preloadedAudio.includes(`${newRegion}-${audio.name}`)
-    );
+    const regionAudio = audioList.filter((audio) => this.audioMark.getState().preloadedAudio.includes(`${newRegion}-${audio.name}`));
 
     for (const { name } of regionAudio) {
       await this.audioMark.processPreloadedAudio(`${newRegion}-${name}`);
@@ -1052,14 +1053,14 @@ class DynamicAudioManager {
       fadeIn: 2.0,
     });
 
-    this.audioMark.setVolume("music", 100);
+    this.audioMark.setVolume('music', 100);
     this.activeRegion = newRegion;
 
     console.log(`Switched to region: ${newRegion}`);
   }
 
   // Queue audio for lazy loading
-  queueAudio(name, source, priority = "normal") {
+  queueAudio(name, source, priority = 'normal') {
     this.audioQueue.push({ name, source, priority });
     this.processQueue();
   }
@@ -1117,26 +1118,26 @@ const manager = new DynamicAudioManager();
 // Game regions with their audio
 const regions = {
   forest: [
-    { name: "ambient", url: "assets/forest/ambient.mp3" },
-    { name: "footsteps", url: "assets/forest/footsteps.wav" },
-    { name: "bird-song", url: "assets/forest/birds.wav" },
+    { name: 'ambient', url: 'assets/forest/ambient.mp3' },
+    { name: 'footsteps', url: 'assets/forest/footsteps.wav' },
+    { name: 'bird-song', url: 'assets/forest/birds.wav' },
   ],
   dungeon: [
-    { name: "ambient", url: "assets/dungeon/ambient.mp3" },
-    { name: "footsteps", url: "assets/dungeon/stone-steps.wav" },
-    { name: "drip", url: "assets/dungeon/water-drip.wav" },
+    { name: 'ambient', url: 'assets/dungeon/ambient.mp3' },
+    { name: 'footsteps', url: 'assets/dungeon/stone-steps.wav' },
+    { name: 'drip', url: 'assets/dungeon/water-drip.wav' },
   ],
 };
 
 // Preload initial region
-await manager.preloadRegion("forest", regions.forest);
+await manager.preloadRegion('forest', regions.forest);
 
 // Switch regions during gameplay
-await manager.switchRegion("dungeon", regions.dungeon);
+await manager.switchRegion('dungeon', regions.dungeon);
 
 // Queue additional audio for later loading
-manager.queueAudio("boss-music", "assets/music/boss.mp3", "high");
-manager.queueAudio("victory", "assets/music/victory.mp3", "low");
+manager.queueAudio('boss-music', 'assets/music/boss.mp3', 'high');
+manager.queueAudio('victory', 'assets/music/victory.mp3', 'low');
 ```
 
 ### Dynamic Volume Control
@@ -1146,17 +1147,17 @@ manager.queueAudio("victory", "assets/music/victory.mp3", "low");
 // Remember: music and SFX volumes are multiplied by master volume
 function updateAudioVolume(gameState) {
   if (gameState.isPaused) {
-    audioMark.setVolume("master", 50); // Reduce overall volume
-    audioMark.setVolume("music", 60); // Effective: 60% × 50% = 30%
-    audioMark.setVolume("sfx", 100); // Effective: 100% × 50% = 50%
+    audioMark.setVolume('master', 50); // Reduce overall volume
+    audioMark.setVolume('music', 60); // Effective: 60% × 50% = 30%
+    audioMark.setVolume('sfx', 100); // Effective: 100% × 50% = 50%
   } else if (gameState.inCombat) {
-    audioMark.setVolume("master", 100); // Full master volume
-    audioMark.setVolume("music", 70); // Effective: 70% × 100% = 70%
-    audioMark.setVolume("sfx", 100); // Effective: 100% × 100% = 100%
+    audioMark.setVolume('master', 100); // Full master volume
+    audioMark.setVolume('music', 70); // Effective: 70% × 100% = 70%
+    audioMark.setVolume('sfx', 100); // Effective: 100% × 100% = 100%
   } else {
-    audioMark.setVolume("master", 100); // Full master volume
-    audioMark.setVolume("music", 80); // Effective: 80% × 100% = 80%
-    audioMark.setVolume("sfx", 90); // Effective: 90% × 100% = 90%
+    audioMark.setVolume('master', 100); // Full master volume
+    audioMark.setVolume('music', 80); // Effective: 80% × 100% = 80%
+    audioMark.setVolume('sfx', 90); // Effective: 90% × 100% = 90%
   }
 }
 ```
@@ -1167,19 +1168,19 @@ function updateAudioVolume(gameState) {
 // Save/load user audio preferences
 function saveAudioSettings() {
   const settings = {
-    master: audioMark.getVolume("master"),
-    music: audioMark.getVolume("music"),
-    sfx: audioMark.getVolume("sfx"),
+    master: audioMark.getVolume('master'),
+    music: audioMark.getVolume('music'),
+    sfx: audioMark.getVolume('sfx'),
   };
-  localStorage.setItem("audioSettings", JSON.stringify(settings));
+  localStorage.setItem('audioSettings', JSON.stringify(settings));
 }
 
 function loadAudioSettings() {
-  const settings = JSON.parse(localStorage.getItem("audioSettings"));
+  const settings = JSON.parse(localStorage.getItem('audioSettings'));
   if (settings) {
-    audioMark.setVolume("master", settings.master);
-    audioMark.setVolume("music", settings.music);
-    audioMark.setVolume("sfx", settings.sfx);
+    audioMark.setVolume('master', settings.master);
+    audioMark.setVolume('music', settings.music);
+    audioMark.setVolume('sfx', settings.sfx);
   }
 }
 ```
@@ -1199,11 +1200,11 @@ Common errors include:
 // Proper error handling pattern
 const initialized = await audioMark.initialize();
 if (initialized) {
-  const loaded = await audioMark.loadAudio("music", "path/to/music.mp3");
+  const loaded = await audioMark.loadAudio('music', 'path/to/music.mp3');
   if (loaded) {
-    const source = audioMark.playMusic("music");
+    const source = audioMark.playMusic('music');
     if (source) {
-      console.log("Music started successfully");
+      console.log('Music started successfully');
     }
     // Note: Errors are shown via alert() automatically
   }
@@ -1218,14 +1219,14 @@ if (initialized) {
 
 ```javascript
 // Problem: Assuming preload success without checking return values
-await audioMark.preloadAudio("music", "invalid-url.mp3"); // Will show alert() and return false
+await audioMark.preloadAudio('music', 'invalid-url.mp3'); // Will show alert() and return false
 
 // Solution: Always check return values for fallback strategies
-const success = await audioMark.preloadAudio("music", "assets/music.mp3");
+const success = await audioMark.preloadAudio('music', 'assets/music.mp3');
 if (!success) {
-  console.error("Failed to preload music (alert was shown to user)");
+  console.error('Failed to preload music (alert was shown to user)');
   // Implement fallback strategy
-  await audioMark.preloadAudio("music", "assets/fallback.mp3");
+  await audioMark.preloadAudio('music', 'assets/fallback.mp3');
 }
 ```
 
@@ -1234,12 +1235,12 @@ if (!success) {
 ```javascript
 // Problem: Trying to process before initialize()
 const audioMark = new MarkJSAudio();
-await audioMark.preloadAudio("music", "assets/music.mp3");
-await audioMark.processPreloadedAudio("music"); // Will fail!
+await audioMark.preloadAudio('music', 'assets/music.mp3');
+await audioMark.processPreloadedAudio('music'); // Will fail!
 
 // Solution: Always initialize first
 await audioMark.initialize(); // Must be after user interaction
-await audioMark.processPreloadedAudio("music"); // Now it works
+await audioMark.processPreloadedAudio('music'); // Now it works
 ```
 
 #### Issue: Memory usage growing too large
@@ -1248,13 +1249,13 @@ await audioMark.processPreloadedAudio("music"); // Now it works
 // Problem: Keeping too much preloaded data
 const audioMark = new MarkJSAudio();
 // Preloading many large files
-await audioMark.preloadAudio("track1", "large-file1.mp3");
-await audioMark.preloadAudio("track2", "large-file2.mp3");
+await audioMark.preloadAudio('track1', 'large-file1.mp3');
+await audioMark.preloadAudio('track2', 'large-file2.mp3');
 // ... memory usage grows
 
 // Solution: Process and clean up promptly
 await audioMark.initialize();
-await audioMark.processPreloadedAudio("track1"); // Cleans up raw data
+await audioMark.processPreloadedAudio('track1'); // Cleans up raw data
 // Only keep processed audio in memory
 ```
 
@@ -1262,25 +1263,25 @@ await audioMark.processPreloadedAudio("track1"); // Cleans up raw data
 
 ```javascript
 // Problem: Trying to load non-audio ArrayBuffer
-const textData = new TextEncoder().encode("Hello World");
-await audioMark.loadFromArrayBuffer("invalid", textData.buffer); // Will fail
+const textData = new TextEncoder().encode('Hello World');
+await audioMark.loadFromArrayBuffer('invalid', textData.buffer); // Will fail
 
 // Solution: Ensure ArrayBuffer contains valid audio data
-const response = await fetch("assets/audio.wav");
+const response = await fetch('assets/audio.wav');
 const audioBuffer = await response.arrayBuffer();
-await audioMark.loadFromArrayBuffer("audio", audioBuffer); // Works
+await audioMark.loadFromArrayBuffer('audio', audioBuffer); // Works
 ```
 
 #### Issue: CORS errors when preloading
 
 ```javascript
 // Problem: Cross-origin audio files
-await audioMark.preloadAudio("music", "https://other-domain.com/music.mp3"); // CORS error
+await audioMark.preloadAudio('music', 'https://other-domain.com/music.mp3'); // CORS error
 
 // Solution: Ensure proper CORS headers or use same-origin files
 // Server must send: Access-Control-Allow-Origin: *
 // Or use same-origin files:
-await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
+await audioMark.preloadAudio('music', '/assets/music.mp3'); // Same origin
 ```
 
 ### Performance Best Practices
@@ -1289,8 +1290,8 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
 
    ```javascript
    // Load UI sounds first, game audio second
-   await audioMark.preloadAudio("ui-click", "assets/ui/click.wav");
-   await audioMark.preloadAudio("ui-error", "assets/ui/error.wav");
+   await audioMark.preloadAudio('ui-click', 'assets/ui/click.wav');
+   await audioMark.preloadAudio('ui-error', 'assets/ui/error.wav');
    // Then load larger game audio in background
    ```
 
@@ -1299,12 +1300,10 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
    ```javascript
    function checkMemoryUsage(audioMark) {
      const state = audioMark.getState();
-     console.log(
-       `Loaded: ${state.loadedAudio.length}, Preloaded: ${state.preloadedAudio.length}`
-     );
+     console.log(`Loaded: ${state.loadedAudio.length}, Preloaded: ${state.preloadedAudio.length}`);
 
      if (state.preloadedAudio.length > 10) {
-       console.warn("Too many preloaded files, consider processing some");
+       console.warn('Too many preloaded files, consider processing some');
      }
    }
    ```
@@ -1313,28 +1312,26 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
 
    ```javascript
    // For short SFX: Use WAV (faster decode)
-   await audioMark.preloadAudio("click", "assets/click.wav");
+   await audioMark.preloadAudio('click', 'assets/click.wav');
 
    // For long music: Use MP3 (smaller size)
-   await audioMark.preloadAudio("theme", "assets/theme.mp3");
+   await audioMark.preloadAudio('theme', 'assets/theme.mp3');
    ```
 
 4. **Implement Progressive Loading**
+
    ```javascript
    // Load in phases based on priority
    async function loadAudioByPriority(audioMark) {
      // Phase 1: Critical UI audio
-     await Promise.all([
-       audioMark.preloadAudio("click", "assets/click.wav"),
-       audioMark.preloadAudio("error", "assets/error.wav"),
-     ]);
+     await Promise.all([audioMark.preloadAudio('click', 'assets/click.wav'), audioMark.preloadAudio('error', 'assets/error.wav')]);
 
      // Phase 2: Background music
-     await audioMark.preloadAudio("bg", "assets/background.mp3");
+     await audioMark.preloadAudio('bg', 'assets/background.mp3');
 
      // Phase 3: Game audio (can be delayed)
      setTimeout(async () => {
-       await audioMark.preloadAudio("sfx", "assets/effects.wav");
+       await audioMark.preloadAudio('sfx', 'assets/effects.wav');
      }, 1000);
    }
    ```
@@ -1346,9 +1343,9 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
    ```javascript
    // Get detailed state for debugging
    const state = audioMark.getState();
-   console.log("MarkJSAudio State:", state);
-   console.log("Preloaded files:", state.preloadedAudio);
-   console.log("Loaded files:", state.loadedAudio);
+   console.log('MarkJSAudio State:', state);
+   console.log('Preloaded files:', state.preloadedAudio);
+   console.log('Loaded files:', state.loadedAudio);
    ```
 
 2. **Verify File Loading**
@@ -1363,8 +1360,8 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
          return false;
        }
 
-       const contentType = response.headers.get("content-type");
-       if (!contentType.includes("audio")) {
+       const contentType = response.headers.get('content-type');
+       if (!contentType.includes('audio')) {
          console.warn(`File might not be audio: ${url} (${contentType})`);
        }
 
@@ -1377,6 +1374,7 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
    ```
 
 3. **Monitor Loading Performance**
+
    ```javascript
    // Time how long preloading takes
    async function timePreload(audioMark, name, url) {
@@ -1384,11 +1382,7 @@ await audioMark.preloadAudio("music", "/assets/music.mp3"); // Same origin
      const success = await audioMark.preloadAudio(name, url);
      const duration = performance.now() - start;
 
-     console.log(
-       `Preload ${name}: ${
-         success ? "SUCCESS" : "FAILED"
-       } in ${duration.toFixed(2)}ms`
-     );
+     console.log(`Preload ${name}: ${success ? 'SUCCESS' : 'FAILED'} in ${duration.toFixed(2)}ms`);
      return success;
    }
    ```

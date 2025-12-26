@@ -1,37 +1,19 @@
-/**
- * MarkJSAudio - JavaScript Audio Library using Web Audio API
- * MIT License
- *
- * A comprehensive audio library for web games supporting SFX and music
- * with volume controls, transitions, and advanced audio features.
- */
-
 export class MarkJSAudio {
   constructor() {
-    this.audioContext = null;
-    this.masterGain = null;
-    this.musicGain = null;
     this.sfxGain = null;
-
-    // Volume settings (0-100)
     this.volumes = {
       master: 100,
       music: 100,
       sfx: 100,
     };
 
-    // Audio buffers storage
     this.audioBuffers = new Map();
 
-    // Preloaded audio data storage (raw ArrayBuffers before decoding)
-    // Stores Promises that resolve to ArrayBuffers
     this.preloadedAudioData = new Map();
 
-    // Active sources for tracking and cleanup
     this.activeSources = new Set();
     this.activeMusicSources = new Set();
 
-    // Current music state
     this.currentMusic = null;
     this.isMusicPaused = false;
     this.musicStartTime = 0;
@@ -40,33 +22,36 @@ export class MarkJSAudio {
     this.isInitialized = false;
   }
 
-  /**
-   * Initialize the audio context and gain nodes
-   * Must be called after user interaction
-   */
+  async waitForAllPreloads() {
+    if (this.preloadedAudioData.size > 0) {
+      try {
+        await Promise.all(Array.from(this.preloadedAudioData.values()));
+        return true;
+      } catch (preloadError) {
+        alert(`Some audio preloads failed: ${preloadError.message}`);
+        return false;
+      }
+    }
+    return true;
+  }
+
   async initialize() {
     try {
-      // Create audio context
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-      // Handle suspended context (user interaction requirement)
       if (this.audioContext.state === 'suspended') {
         await this.audioContext.resume();
       }
-
-      // Create gain nodes for volume control
+      const preloadsOk = await this.waitForAllPreloads();
+      if (!preloadsOk) {
+        return false;
+      }
       this.masterGain = this.audioContext.createGain();
       this.musicGain = this.audioContext.createGain();
       this.sfxGain = this.audioContext.createGain();
-
-      // Connect gain nodes: sfx/music -> master -> destination
       this.musicGain.connect(this.masterGain);
       this.sfxGain.connect(this.masterGain);
       this.masterGain.connect(this.audioContext.destination);
-
-      // Set initial volumes
       this.updateVolumes();
-
       this.isInitialized = true;
       return true;
     } catch (error) {
@@ -75,40 +60,26 @@ export class MarkJSAudio {
     }
   }
 
-  /**
-   * Load audio file from URL, File object, or ArrayBuffer
-   * @param {string} name - Identifier for the audio
-   * @param {string|File|ArrayBuffer} source - URL string, File object, or ArrayBuffer
-   */
   async loadAudio(name, source) {
     if (!this.isInitialized) {
       alert('MarkJSAudio not initialized. Call initialize() first.');
       return false;
     }
-
     try {
       let arrayBuffer;
-
       if (source instanceof ArrayBuffer) {
-        // Handle ArrayBuffer directly
-        // Clone the buffer to prevent the original from being detached
         arrayBuffer = source.slice(0);
       } else if (source instanceof File) {
-        // Handle File object
         arrayBuffer = await source.arrayBuffer();
       } else {
-        // Handle URL string
         const response = await fetch(source);
         if (!response.ok) {
           throw new Error(`Failed to fetch audio: ${response.statusText}`);
         }
         arrayBuffer = await response.arrayBuffer();
       }
-
-      // Decode audio data
       const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
       this.audioBuffers.set(name, audioBuffer);
-
       return true;
     } catch (error) {
       alert(`Failed to load audio "${name}": ${error.message}`);
@@ -116,11 +87,6 @@ export class MarkJSAudio {
     }
   }
 
-  /**
-   * Load audio from ArrayBuffer (for when raw data is already available)
-   * @param {string} name - Identifier for the audio
-   * @param {ArrayBuffer} arrayBuffer - Raw audio data
-   */
   async loadFromArrayBuffer(name, arrayBuffer) {
     if (!this.isInitialized) {
       alert('MarkJSAudio not initialized. Call initialize() first.');
@@ -133,8 +99,6 @@ export class MarkJSAudio {
     }
 
     try {
-      // Decode audio data
-      // Clone the buffer to prevent the original from being detached
       const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer.slice(0));
       this.audioBuffers.set(name, audioBuffer);
 
@@ -145,21 +109,14 @@ export class MarkJSAudio {
     }
   }
 
-  /**
-   * Preload raw audio data (fetch before AudioContext is available)
-   * @param {string} name - Identifier for the audio
-   * @param {string|File} source - URL string or File object
-   */
   async preloadAudio(name, source) {
     try {
       const loadPromise = (async () => {
         let arrayBuffer;
 
         if (source instanceof File) {
-          // Handle File object
           arrayBuffer = await source.arrayBuffer();
         } else {
-          // Handle URL string
           const response = await fetch(source);
           if (!response.ok) {
             throw new Error(`Failed to fetch audio: ${response.statusText}`);
@@ -169,25 +126,18 @@ export class MarkJSAudio {
         return arrayBuffer;
       })();
 
-      // Store the promise immediately
       this.preloadedAudioData.set(name, loadPromise);
 
-      // Wait for it to resolve to ensure it loaded correctly, but we already stored the promise
       await loadPromise;
 
       return true;
     } catch (error) {
       alert(`Failed to preload audio "${name}": ${error.message}`);
-      // Remove the failed promise so we don't try to process it later
       this.preloadedAudioData.delete(name);
       return false;
     }
   }
 
-  /**
-   * Process preloaded audio data (decode after AudioContext is available)
-   * @param {string} name - Identifier for the preloaded audio
-   */
   async processPreloadedAudio(name) {
     if (!this.isInitialized) {
       alert('MarkJSAudio not initialized. Call initialize() first.');
@@ -201,16 +151,12 @@ export class MarkJSAudio {
     }
 
     try {
-      // Wait for the download to finish if it hasn't already
       const arrayBuffer = await arrayBufferPromise;
 
-      // Decode the preloaded audio data
-      // Clone the buffer to prevent the original from being detached
       const bufferCopy = arrayBuffer.slice(0);
       const audioBuffer = await this.audioContext.decodeAudioData(bufferCopy);
       this.audioBuffers.set(name, audioBuffer);
 
-      // Clean up the raw data since it's now processed
       this.preloadedAudioData.delete(name);
 
       return true;
@@ -220,30 +166,32 @@ export class MarkJSAudio {
     }
   }
 
-  /**
-   * Process all preloaded audio data
-   */
   async processAllPreloadedAudio() {
     if (!this.isInitialized) {
       alert('MarkJSAudio not initialized. Call initialize() first.');
-      return false;
+      return { preloadsOk: false, results: [] };
     }
 
+    const preloadsOk = await this.waitForAllPreloads();
     const names = Array.from(this.preloadedAudioData.keys());
     const results = [];
+
+    if (!preloadsOk) {
+      // If preloads failed, mark all as failed
+      for (const name of names) {
+        results.push({ name, success: false });
+      }
+      return { preloadsOk, results };
+    }
 
     for (const name of names) {
       const success = await this.processPreloadedAudio(name);
       results.push({ name, success });
     }
 
-    return results;
+    return { preloadsOk, results };
   }
 
-  /**
-   * Unload audio file
-   * @param {string} name - Identifier for the audio to unload
-   */
   unloadAudio(name) {
     let unloaded = false;
 
@@ -260,11 +208,6 @@ export class MarkJSAudio {
     return unloaded;
   }
 
-  /**
-   * Play sound effect (SFX) - short, low-latency
-   * @param {string} name - Identifier for the SFX
-   * @param {Object} options - Playback options
-   */
   playSFX(name, options = {}) {
     const { loop = false, volume = 1.0, fadeIn = 0 } = options;
 
@@ -276,15 +219,9 @@ export class MarkJSAudio {
     });
   }
 
-  /**
-   * Play music with full controls
-   * @param {string} name - Identifier for the music
-   * @param {Object} options - Playback options
-   */
   playMusic(name, options = {}) {
     const { loop = true, volume = 1.0, fadeIn = 0, stopCurrent = true } = options;
 
-    // Stop current music if requested
     if (stopCurrent && this.currentMusic) {
       this.stopMusic();
     }
@@ -310,10 +247,6 @@ export class MarkJSAudio {
     return source;
   }
 
-  /**
-   * Internal method to play audio
-   * @private
-   */
   _playAudio(name, gainNode, options) {
     if (!this.isInitialized) {
       alert('MarkJSAudio not initialized.');
@@ -327,29 +260,23 @@ export class MarkJSAudio {
     }
 
     try {
-      // Create source node
       const source = this.audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.loop = options.loop;
 
-      // Create gain node for individual volume control
       const sourceGain = this.audioContext.createGain();
       source.connect(sourceGain);
       sourceGain.connect(gainNode);
 
-      // Set volume
       sourceGain.gain.setValueAtTime(options.volume, this.audioContext.currentTime);
 
-      // Handle fade-in
       if (options.fadeIn > 0) {
         sourceGain.gain.setValueAtTime(0, this.audioContext.currentTime);
         sourceGain.gain.linearRampToValueAtTime(options.volume, this.audioContext.currentTime + options.fadeIn);
       }
 
-      // Track active sources for cleanup
       this.activeSources.add(source);
 
-      // Clean up when finished
       source.onended = () => {
         this.activeSources.delete(source);
         if (options.type === 'music') {
@@ -360,7 +287,6 @@ export class MarkJSAudio {
         }
       };
 
-      // Start playback
       source.start(0);
 
       return source;
@@ -370,25 +296,17 @@ export class MarkJSAudio {
     }
   }
 
-  /**
-   * Stop all music
-   */
   stopMusic() {
     this.activeMusicSources.forEach((source) => {
       try {
         source.stop();
-      } catch (e) {
-        // Source may already be stopped
-      }
+      } catch (e) {}
     });
     this.activeMusicSources.clear();
     this.currentMusic = null;
     this.isMusicPaused = false;
   }
 
-  /**
-   * Pause current music
-   */
   pauseMusic() {
     if (this.currentMusic && !this.isMusicPaused) {
       this.musicPauseTime = this.audioContext.currentTime;
@@ -412,9 +330,6 @@ export class MarkJSAudio {
     return false;
   }
 
-  /**
-   * Resume paused music
-   */
   resumeMusic() {
     if (this.currentMusic && this.isMusicPaused) {
       // Calculate offset for resume
@@ -453,9 +368,6 @@ export class MarkJSAudio {
     return false;
   }
 
-  /**
-   * Stop all audio
-   */
   stopAll() {
     this.activeSources.forEach((source) => {
       try {
@@ -470,29 +382,16 @@ export class MarkJSAudio {
     this.isMusicPaused = false;
   }
 
-  /**
-   * Set volume for master, music, or sfx
-   * @param {string} type - 'master', 'music', or 'sfx'
-   * @param {number} volume - Volume from 0 to 100
-   */
   setVolume(type, volume) {
     volume = Math.max(0, Math.min(100, volume));
     this.volumes[type] = volume;
     this.updateVolumes();
   }
 
-  /**
-   * Get current volume
-   * @param {string} type - 'master', 'music', or 'sfx'
-   */
   getVolume(type) {
     return this.volumes[type];
   }
 
-  /**
-   * Update gain node volumes based on current settings
-   * @private
-   */
   updateVolumes() {
     if (!this.isInitialized) return;
 
@@ -505,11 +404,6 @@ export class MarkJSAudio {
     this.sfxGain.gain.setValueAtTime(sfxVol, this.audioContext.currentTime);
   }
 
-  /**
-   * Fade out audio over specified duration
-   * @param {AudioBufferSourceNode} source - The audio source to fade
-   * @param {number} duration - Fade duration in seconds
-   */
   fadeOut(source, duration = 1.0) {
     if (!source || !this.isInitialized) return;
 
@@ -538,12 +432,6 @@ export class MarkJSAudio {
     }
   }
 
-  /**
-   * Transition from one music track to another with crossfade
-   * @param {string} newTrackName - Name of the new track to play
-   * @param {number} transitionTime - Transition duration in seconds
-   * @param {Object} options - Options for the new track
-   */
   async transitionMusic(newTrackName, transitionTime = 2.0, options = {}) {
     if (!this.audioBuffers.has(newTrackName)) {
       alert(`Music track "${newTrackName}" not loaded.`);
@@ -568,9 +456,6 @@ export class MarkJSAudio {
     return true;
   }
 
-  /**
-   * Clean up all resources
-   */
   cleanup() {
     this.stopAll();
 
@@ -587,9 +472,6 @@ export class MarkJSAudio {
     this.isInitialized = false;
   }
 
-  /**
-   * Get current state information
-   */
   getState() {
     return {
       isInitialized: this.isInitialized,

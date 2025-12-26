@@ -897,7 +897,8 @@
               this.log("MarkJSAudio initialized successfully!", "success");
               this.enableUI();
             } else {
-              this.log("MarkJSAudio initialization failed", "error");
+              // Check if any preloads failed
+              this.log("MarkJSAudio initialization failed: One or more audio preloads did not complete successfully.", "error");
               this.elements.initBtn.disabled = false;
             }
           } catch (error) {
@@ -1342,8 +1343,12 @@
           this.log("Processing all preloaded audio...", "info");
 
           try {
-            const results = await this.audioMark.processAllPreloadedAudio();
+            const { preloadsOk, results } = await this.audioMark.processAllPreloadedAudio();
             let successCount = 0;
+
+            if (!preloadsOk) {
+              this.log("Some audio preloads failed before processing.", "error");
+            }
 
             results.forEach((result) => {
               if (result.success) {
